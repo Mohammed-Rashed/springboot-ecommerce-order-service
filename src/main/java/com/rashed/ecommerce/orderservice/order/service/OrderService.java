@@ -8,11 +8,12 @@ import com.rashed.ecommerce.orderservice.order.entity.OrderItem;
 import com.rashed.ecommerce.orderservice.order.entity.OrderStatus;
 import com.rashed.ecommerce.orderservice.order.mapper.OrderMapper;
 import com.rashed.ecommerce.orderservice.order.repository.OrderRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,4 +56,21 @@ public class OrderService {
         return itemRequest.unitPrice()
                 .multiply(BigDecimal.valueOf(itemRequest.quantity()));
     }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        return orderMapper.toResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getCustomerOrders(Long customerId) {
+        return orderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)
+                .stream()
+                .map(orderMapper::toResponse)
+                .toList();
+    }
+
 }
