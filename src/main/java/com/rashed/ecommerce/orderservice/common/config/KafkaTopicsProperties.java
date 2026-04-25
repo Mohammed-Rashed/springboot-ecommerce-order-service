@@ -1,0 +1,14 @@
+package com.rashed.ecommerce.orderservice.common.config;
+
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@ConfigurationProperties(prefix = "app.kafka.topics")
+public record KafkaTopicsProperties(
+        @NotBlank String orderCreated,
+        @NotBlank String stockReserved,
+        @NotBlank String stockRejected
+) {
+}
