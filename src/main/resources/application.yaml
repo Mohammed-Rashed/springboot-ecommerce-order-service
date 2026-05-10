@@ -6,7 +6,7 @@ spring:
     name: order-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/order_service
+    url: jdbc:postgresql://localhost:5432/order_service
     username: postgres
     password: 123456
 
@@ -20,11 +20,16 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
     consumer:
       group-id: order-service-group
       auto-offset-reset: earliest
-    producer:
-      acks: all
 
   flyway:
     enabled: true
@@ -33,3 +38,10 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.apache.kafka: info
+
+app:
+  kafka:
+    topics:
+      order-created: order-created
+      stock-reserved: stock-reserved
+      stock-rejected: stock-rejected

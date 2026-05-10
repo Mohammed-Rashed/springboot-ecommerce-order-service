@@ -6,6 +6,8 @@ import com.rashed.ecommerce.orderservice.order.dto.OrderResponse;
 import com.rashed.ecommerce.orderservice.order.entity.Order;
 import com.rashed.ecommerce.orderservice.order.entity.OrderItem;
 import com.rashed.ecommerce.orderservice.order.entity.OrderStatus;
+import com.rashed.ecommerce.orderservice.order.events.OrderCreatedEvent;
+import com.rashed.ecommerce.orderservice.order.events.OrderCreatedItemEvent;
 import com.rashed.ecommerce.orderservice.order.mapper.OrderMapper;
 import com.rashed.ecommerce.orderservice.order.repository.OrderRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import java.util.List;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final OrderEventPublisher orderEventPublisher;
+
     public OrderResponse createOrder(CreateOrderRequest request) {
         BigDecimal totalAmount = calculateTotalAmount(request);
 
@@ -42,9 +46,30 @@ public class OrderService {
         }
 
         Order savedOrder = orderRepository.save(order);
+
+
+        //send to kafka
+        OrderCreatedEvent orderCreatedEvent= mapToOrderCreatedEvent(order);
+        orderEventPublisher.publishOrderCreated(orderCreatedEvent);
+
+
         return orderMapper.toResponse(savedOrder);
     }
+    private OrderCreatedEvent mapToOrderCreatedEvent(Order order) {
+        List<OrderCreatedItemEvent> items = order.getItems()
+                .stream()
+                .map(item -> new OrderCreatedItemEvent(
+                        item.getProductId(),
+                        item.getQuantity()
+                ))
+                .toList();
 
+        return new OrderCreatedEvent(
+                order.getId(),
+                order.getCustomerId(),
+                items
+        );
+    }
     private BigDecimal calculateTotalAmount(CreateOrderRequest request) {
         return request.items()
                 .stream()
