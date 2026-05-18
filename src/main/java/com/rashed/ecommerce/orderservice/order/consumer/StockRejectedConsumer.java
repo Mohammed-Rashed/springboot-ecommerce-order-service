@@ -1,7 +1,6 @@
 package com.rashed.ecommerce.orderservice.order.consumer;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.rashed.ecommerce.orderservice.order.events.StockRejectedEvent;
 import com.rashed.ecommerce.orderservice.order.events.StockReservedEvent;
 import com.rashed.ecommerce.orderservice.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -13,20 +12,20 @@ import tools.jackson.databind.json.JsonMapper;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StockReservedConsumer {
+public class StockRejectedConsumer {
     final public OrderService orderService;
     private final JsonMapper jsonMapper;
-    @KafkaListener(topics = "${app.kafka.topics.stock-reserved}")
-    public void consumeStockReserved(String message) throws Exception {
-        StockReservedEvent event = jsonMapper.readValue(message, StockReservedEvent.class);
+    @KafkaListener(topics = "${app.kafka.topics.stock-rejected}")
+    public void consumeStockRejected(String message) throws Exception {
+        StockRejectedEvent event = jsonMapper.readValue(message, StockRejectedEvent.class);
         if (event == null) {
             log.warn("Received empty stock-reserved event payload");
             return;
         }
-        orderService.markOrderAsConfirmed(event.orderId());
+        orderService.markOrderAsRejected(event.orderId());
 
         log.info(
-                "Received stock-reserved event. orderId={}",
+                "Received stock-rejected event. orderId={}",
                 event.orderId()
         );
     }

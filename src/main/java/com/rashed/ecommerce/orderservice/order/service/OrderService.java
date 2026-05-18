@@ -105,4 +105,11 @@ public class OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
     }
+    public void markOrderAsRejected(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with id: " + orderId));
+
+        order.setStatus(OrderStatus.REJECTED);
+        orderRepository.save(order);
+    }
 }
