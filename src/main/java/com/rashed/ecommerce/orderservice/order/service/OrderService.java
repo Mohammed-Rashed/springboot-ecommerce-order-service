@@ -1,5 +1,6 @@
 package com.rashed.ecommerce.orderservice.order.service;
 
+import com.rashed.ecommerce.orderservice.common.exception.NotFoundException;
 import com.rashed.ecommerce.orderservice.order.dto.CreateOrderRequest;
 import com.rashed.ecommerce.orderservice.order.dto.OrderItemRequest;
 import com.rashed.ecommerce.orderservice.order.dto.OrderResponse;
@@ -97,5 +98,11 @@ public class OrderService {
                 .map(orderMapper::toResponse)
                 .toList();
     }
+    public void markOrderAsConfirmed(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with id: " + orderId));
 
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+    }
 }
