@@ -14,6 +14,7 @@ import com.rashed.ecommerce.orderservice.order.repository.OrderRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,11 +27,11 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderEventPublisher orderEventPublisher;
 
-    public OrderResponse createOrder(CreateOrderRequest request) {
+    public OrderResponse createOrder(CreateOrderRequest request, Long customerId) {
         BigDecimal totalAmount = calculateTotalAmount(request);
 
         Order order = Order.builder()
-                .customerId(request.customerId())
+                .customerId(customerId)
                 .status(OrderStatus.PENDING)
                 .totalAmount(totalAmount)
                 .build();

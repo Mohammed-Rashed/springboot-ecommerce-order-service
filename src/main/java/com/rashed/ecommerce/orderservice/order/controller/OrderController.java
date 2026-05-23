@@ -17,8 +17,8 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public OrderResponse createOrder(@RequestBody @Valid CreateOrderRequest request) {
-        return orderService.createOrder(request);
+    public OrderResponse createOrder(@RequestBody @Valid CreateOrderRequest request,@RequestHeader("X-User-Id") Long customerId) {
+        return orderService.createOrder(request,customerId);
     }
     @GetMapping("/customer/{customerId}")
     public List<OrderResponse> getCustomerOrders(@PathVariable Long customerId) {
